@@ -71,7 +71,7 @@ class Pooling_Classifier(nn.Module):
             lst_mx = []
             idx = 0
             for i in range(lst_lens.size(0)):
-                set_x = x[idx:idx + lst_lens[i], :] # n*d
+                set_x = x[idx:idx + lst_lens[i], :]  # n*d
                 idx += lst_lens[i]
                 lst_mx.append(set_x.t().unsqueeze(0))
 
@@ -97,20 +97,20 @@ class NAN_Attention(nn.Module):
     def forward(self, Xs):
         # Xs: N*C*K
         N, C, K = Xs.shape
-        score = torch.matmul(self.q, Xs) # N*1*K
-        score = F.softmax(score, dim=-1)
+        score = torch.matmul(self.q, Xs)  # N*1*K
+        score = F.softmax(score, dim=-1)  # torch.Size([384, 1, 8])
 
-        r = torch.mul(Xs, score)
-        r = torch.sum(r, dim=-1) # N*C
-        new_q = self.fc(r) # N*C
+        r = torch.mul(Xs, score)  # torch.Size([384, 512, 8])
+        r = torch.sum(r, dim=-1)  # N*C  torch.Size([384, 512])
+        new_q = self.fc(r)  # N*C  fc 512*512  torch.Size([384, 512])
         new_q = self.tanh(new_q)
-        new_q = new_q.view(N, 1, C)
+        new_q = new_q.view(N, 1, C)  # torch.Size([384, 1, 512])
 
-        new_score = torch.matmul(new_q, Xs)
+        new_score = torch.matmul(new_q, Xs)  # torch.Size([384, 1, 8])
         new_score = F.softmax(new_score, dim=-1)
 
-        o = torch.mul(Xs, new_score)
-        o = torch.sum(o, dim=-1) #N*C
+        o = torch.mul(Xs, new_score)  # torch.Size([384, 512, 8])
+        o = torch.sum(o, dim=-1)  # N*C  torch.Size([384, 512])
 
         return o
 
